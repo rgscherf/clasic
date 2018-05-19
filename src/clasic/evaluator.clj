@@ -4,7 +4,6 @@
             [clojure.string :as string]
             [clojure.edn :as edn]))
 
-(s/check-asserts true)
 (s/def :compiler/bindings list?)
 (s/def :compiler/env (s/keys :req [:compiler/bindings]))
 (s/def :compiler/evalresult (s/keys :req [:compiler/result :compiler/env]))
@@ -94,14 +93,17 @@
 (defn- new-binding
   "Add a new binding to the current stack frame."
   [env [[_ id-string :as _] expr]]
-  (let [binding-stack (-> env :compiler/bindings)
+  (let [envbindings (:compiler/env env)
+        binding-stack (:compiler/bindings envbindings)
         letval (:compiler/result (eval-expr env expr))]
     {:compiler/result letval
-     :compiler/env (assoc env :compiler/bindings
-                          (cons (assoc (first binding-stack)
-                                       (keyword id-string)
-                                       letval)
-                                (rest binding-stack)))}))
+     :compiler/env (assoc envbindings
+                          :compiler/bindings
+                          (apply list
+                                 (cons (assoc (first binding-stack)
+                                              (keyword id-string)
+                                              letval)
+                                       (rest binding-stack))))}))
 
 (defn- eval-exprs
   "Reduce return maps through a structure of clauses."
@@ -130,5 +132,9 @@
 
   (evaluate-str "10")
 
+  (evaluate-str "let x = 4")
+
   (evaluate-str "let x = 4
-                    plus(1 2 3 x)"))
+                    plus(1 2 3 x)")
+
+  "end comment")
