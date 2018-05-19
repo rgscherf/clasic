@@ -1,17 +1,20 @@
 (ns clasic.evaluator
   (:require [clasic.lexer :as lexer]
+            [clojure.spec.alpha :as spec]
             [clojure.string :as string]
             [clojure.edn :as edn]))
 
 (declare new-binding)
-(declare eval-clause)
-(declare eval-clauses)
+(declare eval-exprs)
+(declare eval-call)
 
-(def initial-env  {:bindings (list {:plus +
-                                    :minus -
-                                    :mult *
-                                    :print println
-                                    :div /})})
+(def initial-env  {:result nil
+                   :env {:bindings (list {:plus +
+                                          :minus -
+                                          :mult *
+                                          :print println
+                                          :list list
+                                          :div /})}})
 
 (defn- remove-str-single-quotes
   [s]
@@ -20,6 +23,7 @@
 (defn- lookup
   "Look up a symbol in the binding stack."
   [envs kw]
+  (println "lookup envs:" envs)
   (if (empty? envs)
     (throw (Exception. (str "Symbol <<" (name kw) ">> was not found in environment.")))
     (let [[first-env & rest-envs] envs
@@ -28,9 +32,13 @@
         result
         (lookup rest-envs kw)))))
 
+(comment (evaluate-str "print(1 2 3)"))
+
 (defn- eval-identifier
   "Retrieve the value of a (string) identifier from the binding stack."
-  [{:keys [bindings]} [identifier]]
+  [{:keys [bindings] :as received-env} [identifier]]
+  (println "in eval-identifier, here is received env: " received-env)
+  (println "in eval-identifier, here is identifier: " identifier)
   (->> identifier keyword (lookup bindings)))
 
 (defn- expr-ret
@@ -49,26 +57,34 @@
 (defn- eval-ctx
   "Evaluate a context expression"
   [env expr-args]
-  (let [ret (eval-clauses {:env (increment-stack env)}
-                          expr-args)]
+  (let [ret (eval-exprs {:env (increment-stack env)}
+                        expr-args)]
     (expr-ret (-> ret :env decrement-stack)
               (:result ret))))
 
 (defn eval-expr
   "Evaluate a single expression."
-  [env [_ [expr-type & expr-args]]]
+  [env [expr-type & expr-args]]
+  (println "evaluating expr, here is env:" env)
   (case expr-type
     :CTX (eval-ctx env expr-args)
     :LET  (new-binding env expr-args)
     :SYMBOL (expr-ret env (eval-identifier env expr-args))
     :NUMBER (expr-ret env (-> expr-args first edn/read-string))
     :STRING (expr-ret env (-> expr-args first remove-str-single-quotes))
-    ;; TODO rewrite CALL in terms of eval-clauses 
-    :CALL (expr-ret env (eval (map (comp :result (partial eval-clause env)) expr-args)))))
+    :CALL (expr-ret env (eval-call (:env env) expr-args))))
+
+(defn- eval-call
+  [env exprs]
+  (->> exprs
+       (map (partial eval-exprs {:env env}))
+       (map :result)
+       (apply list)
+       eval))
 
 (defn- new-binding
   "Add a new binding to the current stack frame."
-  [env [[_ id-string] expr]]
+  [env [[_ id-string :as _] expr]]
   (let [binding-stack (-> env :bindings)
         letval (:result (eval-expr env expr))]
     {:result letval
@@ -78,17 +94,11 @@
                               letval)
                        (rest binding-stack)))}))
 
-(defn- eval-clause
-  "Eval a single clause."
-  [env [clause-type & _ :as clause-expr]]
-  (case clause-type
-    :EXPR (eval-expr env clause-expr)))
-
-(defn- eval-clauses
+(defn- eval-exprs
   "Reduce return maps through a structure of clauses."
   [init-env exprs]
   (reduce (fn [env new-expr]
-            (eval-clause (:env env) new-expr))
+            (eval-expr (:env env) new-expr))
           init-env
           exprs))
 
@@ -97,4 +107,15 @@
   [instr]
   (->> instr
        (lexer/clasic-lexer)
-       (eval-clauses {:env initial-env})))
+       (eval-exprs initial-env)))
+
+(comment
+
+  (eval-exprs initial-env (lexer/clasic-lexer "print(1)"))
+
+  (evaluate-str "print(1)")
+
+  (evaluate-str "10")
+
+  (evaluate-str "let x = 4
+                    plus(1 2 3 x)"))
