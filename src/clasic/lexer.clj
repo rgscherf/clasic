@@ -4,7 +4,7 @@
 (defn clasic-grammar
   []
   "<PROGRAM> = EXPR+
-  EXPR = WHITESPACE? (SYMBOL | NUMBER | STRING | LET | FOR | CALL)
+  EXPR = WHITESPACE? (SYMBOL | NUMBER | STRING | LET | FOR | CALL | CTX)
   CTX = <'ctx'> WHITESPACE? <'{'> WHITESPACE? EXPR* WHITESPACE? <'}'>
   FOR = WHITESPACE? <'for '> SYMBOL <' in '> EXPR <' {'> EXPR WHITESPACE-CR? <'}'>
   LET = WHITESPACE? <'let '> SYMBOL <' = '> EXPR
