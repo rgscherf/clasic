@@ -1,6 +1,6 @@
-(defproject clasic "0.1.0-SNAPSHOT"
-  :description "BASIC-like lang with closures."
-  :url "https://github.com/rgscherf/clasic"
+(defproject drty "0.1.0-SNAPSHOT"
+  :description "Thoroughly unhygenic expression-based lang"
+  :url "https://github.com/rgscherf/drty"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[instaparse "1.4.9"]

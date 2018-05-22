@@ -1,10 +1,10 @@
-# clasic
+# drty
 
 A small imperative-looking language for experiementing with lexical scope.
 
 ## Usage
 
-Pass a string to `clasic.evaluator/evaluate-str`!
+Pass a string to `drty.evaluator/evaluate-str`!
 
 Functions are called with fn(x y) notation, mapping to Clojure fns under the
 hood.

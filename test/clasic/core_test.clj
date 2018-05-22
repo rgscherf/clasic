@@ -1,6 +1,6 @@
-(ns clasic.core-test
+(ns drty.core-test
   (:require [clojure.test :refer :all]
-            [clasic.core :refer :all]))
+            [drty.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

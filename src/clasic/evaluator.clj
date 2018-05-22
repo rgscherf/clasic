@@ -1,5 +1,5 @@
-(ns clasic.evaluator
-  (:require [clasic.lexer :as lexer]
+(ns drty.evaluator
+  (:require [drty.lexer :as lexer]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.edn :as edn]))
@@ -117,16 +117,16 @@
   "Take an input string and evaluate it using language grammar."
   [instr]
   (->> instr
-       (lexer/clasic-lexer)
+       (lexer/drty-lexer)
        (eval-exprs initial-env)))
 
 (comment
 
   initial-env initial-env
 
-  (eval-exprs initial-env (lexer/clasic-lexer "print(1)"))
+  (eval-exprs initial-env (lexer/drty-lexer "print(1)"))
 
-  (lexer/clasic-lexer "print(1)")
+  (lexer/drty-lexer "print(1)")
 
   (evaluate-str "plus(1 plus(2 1))")
 

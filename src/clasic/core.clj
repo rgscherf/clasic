@@ -1,4 +1,4 @@
-(ns clasic.core
-  (:require [clasic.evaluator :as clasic]))
+(ns drty.core
+  (:require [drty.evaluator :as drty]))
 
-(clasic/evaluate-str "plus(1 1)")
+(drty/evaluate-str "plus(1 1)")

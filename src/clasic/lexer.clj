@@ -1,4 +1,4 @@
-(ns clasic.lexer
+(ns drty.lexer
   (:require [instaparse.core :as insta]))
 
 ;; still need:
@@ -6,7 +6,7 @@
 ;; - conditionals?
 ;;  - cond-only would be nice. if odd # of forms, final is the else.
 
-(defn clasic-grammar
+(defn drty-grammar
   []
   "<PROGRAM> = EXPR+
   <EXPR> = WHITESPACE? (SYMBOL | NUMBER | STRING | LET | LISTCOMP | CALL | CTX)
@@ -23,6 +23,6 @@
 
 (defn- lexer
   []
-  (insta/parser (clasic-grammar)))
+  (insta/parser (drty-grammar)))
 
-(def clasic-lexer (lexer))
+(def drty-lexer (lexer))
